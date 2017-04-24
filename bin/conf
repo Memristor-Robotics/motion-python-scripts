@@ -1,0 +1,19 @@
+#!/usr/bin/python
+import sys
+sys.path.append('/home/pi/python')
+from convert import *
+from const import *
+from conf import *
+
+
+if len(sys.argv) >= 2:
+    if sys.argv[1] == 'list':
+        conf_list()
+
+if len(sys.argv) >= 3:
+    if sys.argv[1] == 'get':
+        print( conf_get(sys.argv[2]) )
+    elif not conf_set(sys.argv[1], sys.argv[2]):
+        print("no such config")
+
+

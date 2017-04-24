@@ -1,0 +1,4 @@
+#!/bin/bash
+
+#echo -en "S" > /dev/serial0
+s S

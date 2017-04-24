@@ -1,0 +1,29 @@
+#!/usr/bin/python
+import binascii
+import os
+import sys
+sys.path.append('/home/pi/python')
+#from read import *
+from uart import *
+os.system('stty -echo raw 57600 -F/dev/serial0')
+from convert import l16
+
+def P_cmd(p):
+    #print(len(p), p)
+    print(p[0] + " (" + str(l16(p, 1)) + ", " + str(l16(p, 3)) + ")  angle: " + str(l16(p, 5)) + " speed: " + str(l16(p,7))) 
+
+def do_nothing(p):
+    pass
+
+packets = {
+    'P': P_cmd,
+    'p': P_cmd,
+    'F': do_nothing,
+    #'A': do_nothing
+}
+while True:
+	p = read()
+        if chr(p[0]) in packets:
+            packets[chr(p[0])](p[1])
+        else:
+	    print(chr(p[0]), binascii.hexlify(p[1]))

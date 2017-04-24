@@ -1,0 +1,10 @@
+/*
+/.*
+/*
+/*/
+*.pyc
+*.txz
+!.gitignore
+!/bin/
+!/python/
+!/tests/

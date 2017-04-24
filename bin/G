@@ -1,0 +1,12 @@
+#!/usr/bin/python
+import sys
+sys.path.append('/home/pi/python')
+from send import *
+from convert import *
+send('i')
+# xx yy o rr
+orient = 1
+if len(sys.argv) >= 4:
+    orient = to_uchar(int(sys.argv[4]))
+if len(sys.argv) >= 3:
+    send("G" + pack(int(sys.argv[1])) + pack(int(sys.argv[2])) + chr(orient))
