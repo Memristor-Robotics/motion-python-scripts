@@ -80,6 +80,9 @@ def goto(x,y,o=1):
     goto_cmd(x,y,o)
     wait_for_arrival()
 
+def motor(a,b):
+    send(commands['motor'] + pack(a) + pack(b))
+
 def turn(o):
     print('turn: ', o)
     intr()

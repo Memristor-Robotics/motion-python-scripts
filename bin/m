@@ -1,3 +1,9 @@
-#!/bin/bash
+#!/bin/python
 
-echo -en "s" > /dev/serial0
+
+sys.path.append('/home/pi/python')
+from send import *
+from convert import *
+
+if len(sys.argv) >= 3:
+    send('m' + pack(sys.argv[1]) + pack(sys.argv[2]))

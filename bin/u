@@ -1,3 +1,2 @@
 #!/bin/bash
-
-s R; s 'c\x0'
+s u
