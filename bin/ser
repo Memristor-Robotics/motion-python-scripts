@@ -1,0 +1,3 @@
+#!/bin/bash
+stty -echo raw -F/dev/serial0 $2
+sp "$1"

@@ -3,7 +3,7 @@ import sys
 sys.path.append('/home/pi/python')
 from engine import *
 
-conf_set('send_status_interval', 200)
+#conf_set('send_status_interval', 100)
 setpos(610,-790,-90)
 tol=0
 speed(70)

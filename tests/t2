@@ -6,5 +6,4 @@ from engine import *
 conf_set('send_status_interval', 100)
 setpos(0,0)
 for i in range(10):
-    settol(0)
     turn(180)

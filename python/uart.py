@@ -7,33 +7,13 @@ f = os.open("/dev/serial0", os.O_RDWR)
 
 tty.setraw(f)
 
-bdata = ''
-def chdata(n=1):
-    global bdata
-    if len(bdata) >= n:
-        return True
-    d = os.read(f,n-len(bdata))
-    bdata += d
-    if len(bdata) >= n:
-        return True
-    return False
-
-
 def rddata(n=1):
-    global bdata
-    if len(bdata) >= n:
-        data = bdata[:n]
-        bdata = bdata[n:]
-        return data
-    
-    n -= len(bdata)
+    b = ''
     while n > 0:
-        d = os.read(f, n)
+        d = os.read(f, 1)
         n -= len(d)
-        bdata += d
-    data = bdata
-    bdata = ''
-    return data
+        b += d
+    return b
 
 sync = 0x3c
 # SCTLxxxx
