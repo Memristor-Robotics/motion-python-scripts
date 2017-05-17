@@ -43,9 +43,12 @@ class mycan:
             print('[debug] sent: ' + mycan.nice_hex(frame))
         self.s.send(frame)
 
-    def graw(self):
-        frame = self._dissect_can_frame(self.s.recv(16))
-        print(mycan.nice_hex(frame[2]))
+    def graw(self,id=None):
+        while True:
+            frame = self._dissect_can_frame(self.s.recv(16))
+            if id == None or id == frame[0]:
+                print(hex(frame[0]) + ": " + mycan.nice_hex(frame[2]))
+                break
 
     def servo(self,which,f,val=None):
         if which not in robot_servos:
@@ -84,6 +87,7 @@ class mycan:
             servo_len += 1
 
 
+        
 
         addr = 0x7f00 if servo[0] == 'ax' else 0x7f01
         fmt = '4B'+servo_fmt

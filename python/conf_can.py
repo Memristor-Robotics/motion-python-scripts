@@ -39,7 +39,9 @@ robot_servos = {
     'HandLeft': ['ax', 2],
     'HandRight': ['ax', 11],
     'Pump': ['ax', 5],
-    'Limiter': ['ax', 6]
+    'Limiter': ['ax', 6],
+    'HandLeftR': ['rx', 1],
+    'HandRightR': ['rx', 2]
 }
 
 robot_byte_act = {

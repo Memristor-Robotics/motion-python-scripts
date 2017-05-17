@@ -30,6 +30,7 @@ def read():
             CP = C & 0xf
 
             if CH != ((T + L) & 0xf):
+                print('bad crc')
                 continue
 
             #print("header ok")
