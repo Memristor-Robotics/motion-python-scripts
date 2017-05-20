@@ -32,6 +32,7 @@ servo_commands = {
 }
 
 robot_servos = {
+<<<<<<< HEAD
 	'ColorServo': ['ax', 7],
 	'Stopper': ['ax', 6],
 	'TrackLeft': ['ax', 4],
