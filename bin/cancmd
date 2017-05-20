@@ -1,23 +1,20 @@
 #!/usr/bin/python3 -i
 
-import sys
-sys.path.append('/home/pi/python')
-import subprocess
-import os
-if len(sys.argv) == 1:
-    subprocess.call(['sudo','can'])
-else:
-    subprocess.call('sudo ip link set can0 down'.split(' '))
-    subprocess.call('sudo ip link set can0 up type can bitrate 125000'.split(' '))
+import os,sys
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'python'))
+
+from Can import *
+Can.init()
 
 print('CAN cmd')
 
 print('use: \n\
-       c.actuator(which, value)\n\
-       c.servo(which, func, value)\n\
-       listServoCmds()\n\
-       listServo()\n\
-       listActuators()\n\
-       c.debug = 1\n\
-       ')
-from cansend import *
+	c.actuator(which, value)\n\
+	c.servo(which, func, value)\n\
+	listServoCmds()\n\
+	listServo()\n\
+	listActuators()\n\
+	c.debug = 1\n\
+	')
+from Can import *
+c = Can()

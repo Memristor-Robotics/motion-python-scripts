@@ -1,9 +1,11 @@
-#!/usr/bin/python
-import sys
-sys.path.append('/home/pi/python')
-from send import *
-send('i')
+#!/usr/bin/python3
+import os,sys
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'python'))
+from Engine import *
+e=Engine()
+
+e.send(b'i')
 if len(sys.argv) == 2:
-    send("D" + pack(int(sys.argv[1])) + chr(0))
+	e.send(b'D' + pack(int(sys.argv[1])) + b'\x00')
 else:
-    send("D" + pack(512) + chr(0))
+	e.send(b'D' + pack(512) + b'\x00')
