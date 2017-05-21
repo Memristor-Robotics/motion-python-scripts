@@ -32,7 +32,6 @@ servo_commands = {
 }
 
 robot_servos = {
-<<<<<<< HEAD
 	'ColorServo': ['ax', 7],
 	'Stopper': ['ax', 6],
 	'TrackLeft': ['ax', 4],
@@ -56,6 +55,9 @@ robot_byte_act = {
 	'FrontInfra': [0x7f0e, 'R'],
 	'MiddleInfra': [0x7f0d, 'R'],
 	'ColorRotator': [0x7f12, 'W'],
+	'SColorRotator1': [0x7f13, 'W'],
+	'SColorRotator2': [0x7f14, 'W'],
+	
 }
 
 
@@ -71,5 +73,5 @@ def listServo():
 
 def listActuators():
 	print('Actuators, Sensors:')
-	for i in robot_byte_act:
+	for i in sorted(robot_byte_act):
 		print('\t' + i)

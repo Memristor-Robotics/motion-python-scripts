@@ -1,15 +1,13 @@
 config_bytes = [
 	'distance_regulator',
 	'rotation_regulator',
-	'out_of_control_protection',
 	'enable_stuck',
 	'stuck',
 	'debug',
 	'status_change_report',
-	'status_send_count',
+	'keep_count',
 	'tmr',
-	'motor_left_inverted',
-	'motor_right_inverted',
+	'motor_connected',
 
 ]
 config_ints = [
@@ -20,7 +18,7 @@ config_ints = [
 	'motor_speed_limit',
 	'motor_rate_of_change',
 	'send_status_interval',
-	'keep_count',
+	'motor_const_roc',
 
 ]
 config_floats = [
@@ -39,3 +37,28 @@ config_floats = [
 	'slowdown_angle',
 	'angle_speedup',
 ]
+commands = {
+	'set_config': 'c',
+	'get_config': 'C',
+	'move_to': 'N',
+	'send_status_and_position': 'P',
+	'unstuck': 'U',
+	'motor': 'm',
+	'send_position': 'p',
+	'set_speed': 'V',
+	'set_rotation_speed': 'r',
+	'move_forward': 'r',
+	'relative_rotate': 'T',
+	'absolute_rotate': 'A',
+	'turn_and_go': 'G',
+	'curve': 'Q',
+	'hard_stop': 'S',
+	'soft_stop': 's',
+	'smooth_stop': 't',
+	'reset_driver': 'R',
+	'kill_regulator': 'H',
+	'forward': 'D',
+	'set_position_and_orientation': 'I',
+	'break': 'i',
+}
+

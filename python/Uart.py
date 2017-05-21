@@ -26,11 +26,11 @@ class Uart:
 	def read(self):
 		sync = 0x3c
 		while True:
-			S = self.rddata()
+			S = self.rddata()[0]
 			if S == sync:
-				C = self.rddata()
-				T = self.rddata()
-				L = self.rddata()
+				C = self.rddata()[0]
+				T = self.rddata()[0]
+				L = self.rddata()[0]
 
 				#print("reading " + hex(C) + " " + hex(T) + " " + hex(L) )
 				CH = C >> 4
@@ -43,7 +43,7 @@ class Uart:
 				c = 0
 				data = self.rddata(L)
 				for i in data:
-					c += ord(i)
+					c += i
 
 				if CP != (c & 0xf):
 					continue

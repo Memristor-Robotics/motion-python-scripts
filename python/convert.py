@@ -31,7 +31,7 @@ def cx(x):
 
 
 def l16(x, idx):
-	return to_int16( (ord(x[idx]) << 8) | ord(x[idx+1]) );
+	return to_int16( (x[idx] << 8) | x[idx+1] );
 
 def ls16(x, idx):
 	return str(l16(x,idx))

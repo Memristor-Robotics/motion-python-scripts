@@ -54,7 +54,7 @@ class Can:
 			frame = self._dissect_can_frame(self.s.recv(16))
 			if addr == None:
 				return frame[2]
-			elif addr == frame[0]:
+			elif addr | 0x80000000 == frame[0]:
 				return frame[2]
 				
 		
@@ -67,7 +67,7 @@ class Can:
 		
 	def send(self,buff,addr=None):
 		if addr == None:
-			addr = self.addr			
+			addr = self.addr		
 		frame = self._build_can_frame(addr, buff)
 		self.s.send(frame)
 
@@ -76,17 +76,22 @@ class Can:
 		print(Can.nice_hex(frame[2]))
 
 	def servo(self,which,f,val=None):
-		if which not in robot_servos:
-			print('servo ' + which + ' doesn\'t exist')
-			return
+		
 
 		if f not in servo_commands:        
 			print('function ' + f + ' doesn\'t exist')
 			return
 
-		servo = robot_servos[which]
+		if type(which) is str:
+			if which not in robot_servos:
+				print('servo ' + which + ' doesn\'t exist')
+				return
+			servo = robot_servos[which]
+			servo_id = servo[1]
+		elif type(which) is int:
+			servo_id = which
+		
 		cmd = servo_commands[f]
-		servo_id = servo[1]
 		servo_len = 4
 		servo_func = cmd[0]
 		servo_rw = cmd[1]
@@ -112,8 +117,7 @@ class Can:
 			servo_len += 1
 
 
-
-		addr = 0x7f00 if servo[0] == 'ax' else 0x7f01
+		addr = 0x7f00 if type(which) is int or servo[0] == 'ax' else 0x7f01
 		fmt = '4B'+servo_fmt
 		data = [servo_id, servo_len, servo_rw, servo_func]
 		if val != None:
@@ -158,5 +162,5 @@ class Can:
 		else:
 			print("reading from sensor not implemented yet")
 
-		c.raw(act[0], 'B', [val])
+		self.raw(act[0], 'B', [val])
 		

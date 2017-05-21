@@ -1,2 +1,2 @@
-use_can = 0
+use_can = 1
 motion_can_addr = 600

@@ -2,6 +2,7 @@ from math import sqrt
 
 from convert import *
 from conf import *
+from const_motion import *
 from parser import *
 from const_motion import *
 
@@ -66,31 +67,31 @@ class Engine:
 						tokens[j] = chr(int(i[0], 16)) + i[1:]
 			binary = (''.join(tokens)).encode('latin1')
 		else:
-			binary = text
+			binary = x
 		
 		if self.use_can:
-			binary = str.encode(binary)
-			self.com.send(self.addr, binary)
+			self.com.send(binary, self.addr)
 		else:
 			self.com.send(binary)
 					
 	def read(self):
 		if self.use_can:
-			return self.com.read(self.addr)
+			frm = self.com.read(self.addr)
+			return (frm[0], frm[1:])
 		else:
 			return self.com.read()
 		
 	def move_to_cmd(self, x,y,r=100,o=1):
-		self.send(b'N' + pack(x) + pack(y) + chr(to_uchar(o)) + pack(r))
+		self.send(b'N' + pack(x) + pack(y) + uchr(to_uchar(o)) + pack(r))
 		
 	def goto_cmd(self, x,y,r=100,o=1):
-		self.send(b'G' + pack(x) + pack(y) + chr(to_uchar(o)))
+		self.send(b'G' + pack(x) + pack(y) + uchr(to_uchar(o)))
 		
 	def turn_cmd(self, o):
 		self.send(b'T' + pack(o))
 		
 	def speed(self, s):
-		self.send(b'V' + chr(s))
+		self.send(b'V' + uchr(s))
 		
 	def intr(self):
 		self.send(b'i')
@@ -149,6 +150,7 @@ class Engine:
 		self.send(b'C' + uchr(self.conf_get_key(c)))
 		while True:
 			p = self.read()
+			print(p)
 			if p[0] == b'C'[0] and len(p[1]) >= 4:
 				return uint32_to_float(struct.unpack('>I',p[1])[0])  
 

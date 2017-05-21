@@ -5,14 +5,14 @@ from Engine import *
 e=Engine()
 
 
-if len(sys.argv) >= 2:
+if len(sys.argv) == 2:
 	if sys.argv[1] == 'list':
 		e.conf_list()
+	else:
+		print( e.conf_get(sys.argv[1]) )
 
-if len(sys.argv) >= 3:
-	if sys.argv[1] == 'get':
-		print( e.conf_get(sys.argv[2]) )
-	elif not e.conf_set(sys.argv[1], sys.argv[2]):
+elif len(sys.argv) >= 3:
+	if not e.conf_set(sys.argv[1], sys.argv[2]):
 		print("no such config")
 
 
