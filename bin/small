@@ -1,0 +1,4 @@
+#!/bin/bash
+conf pid_d_p 1.0
+conf pid_r_p 1.7
+conf stuck_distance_max_fail_count 250

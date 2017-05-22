@@ -14,6 +14,8 @@ print('use: \n\
 	listServoCmds()\n\
 	listServo()\n\
 	listActuators()\n\
+	c.read()\n\
+	c.read(addr)\n\
 	c.debug = 1\n\
 	')
 from Can import *

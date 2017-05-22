@@ -16,6 +16,11 @@ class Can:
 		iface = 'can0'
 		self.s.bind((iface,))
 		
+	def ext(self,tf):
+		if tf:
+			self.use_eff = 0x80000000
+		else:
+			self.use_eff = 0
 	def init():
 		import subprocess
 		subprocess.call('sudo ip link set can0 down'.split(' '))
@@ -53,8 +58,8 @@ class Can:
 		while True:
 			frame = self._dissect_can_frame(self.s.recv(16))
 			if addr == None:
-				return frame[2]
-			elif addr | 0x80000000 == frame[0]:
+				return (hex(frame[0]), frame[2])
+			elif addr | 0x80000000 == frame[0] or addr == frame[0]:
 				return frame[2]
 				
 		
@@ -128,13 +133,9 @@ class Can:
 			print('Sent request, waiting for answer')
 			while True:
 				frame = self._dissect_can_frame(self.s.recv(16))
-				if frame[0] == addr and frame[1] > 0 and frame[2][0] == servo_id:
-					dlc = frame[1]
-					servo_len = frame[2][3]-3
-					servo_fmt = 'B'
-					if servo_len == 2:
-						servo_fmt = 'h'
-					print(which + ': ' + struct.unpack(servo_fmt, frame[2][len(frame[2])-(servo_len+1):dlc-1]))
+				
+				if frame[0] == (addr | self.use_eff) and frame[1] > 0:
+					print(hex(frame[0]), Can.nice_hex(frame[2]))
 					return
 
 
@@ -144,23 +145,28 @@ class Can:
 			val - value to write
 				(omitt if reading sensor)
 		'''
-		if which not in robot_byte_act:
-			print('sensor or actuator ' + which + ' doesn\'t exist')
-			return
-
-		act = robot_byte_act[which]
-
-		if val != None and 'W' not in act[1]:
-			print('Cannot write to sensor')
 		
-		if val == None and 'R' not in act[1]:
-			print('Cannot read from actuator')
-
-		data = []
-		if val != None:
-			data = [val]
+		if type(which) is int:
+			self.raw(which, 'B', [val])
 		else:
-			print("reading from sensor not implemented yet")
+			if which not in robot_byte_act:
+				print('sensor or actuator ' + which + ' doesn\'t exist')
+				return
 
-		self.raw(act[0], 'B', [val])
+			act = robot_byte_act[which]
+
+			if val != None and 'W' not in act[1]:
+				print('Cannot write to sensor')
+			
+			if val == None and 'R' not in act[1]:
+				print('Cannot read from actuator')
+
+			data = []
+			if val != None:
+				data = [val]
+			else:
+				print("reading from sensor not implemented yet")
+				#self.raw(act[0], 'B', [val])
+
+			self.raw(act[0], 'B', [val])
 		

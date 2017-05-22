@@ -36,6 +36,7 @@ config_floats = [
 	'slowdown',
 	'slowdown_angle',
 	'angle_speedup',
+	'speed_drop',
 ]
 commands = {
 	'set_config': 'c',

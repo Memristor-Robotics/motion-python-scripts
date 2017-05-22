@@ -41,7 +41,8 @@ robot_servos = {
 	'Pump': ['ax', 5],
 	'Limiter': ['ax', 6],
 	'SDir': ['ax', 20],
-	'SSide': ['ax', 21]
+	'SSide': ['ax', 21],
+    'SBall': ['ax', 50]
 }
 
 robot_byte_act = {
@@ -49,12 +50,14 @@ robot_byte_act = {
 	'Rope': [0x7f09, 'R'],
 	'Pump': [0x7f02, 'W'],
 	'Cylinder': [0x7f03, 'W'],
-	'FunnyAction': [1502, 'W'],
+	'Color': [0xab01, 'W'],
+	'FunnyAction': [0xab02, 'W'],
 	'BigTrack': [0x7f06, 'W'],
 	'BackInfra': [0x7f10, 'R'],
 	'FrontInfra': [0x7f0e, 'R'],
 	'MiddleInfra': [0x7f0d, 'R'],
 	'ColorRotator': [0x7f12, 'W'],
+	'ColorRotator2': [0x7f07, 'W'],
 	'SColorRotator1': [0x7f13, 'W'],
 	'SColorRotator2': [0x7f14, 'W'],
 	
