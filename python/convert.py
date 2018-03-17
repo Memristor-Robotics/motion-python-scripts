@@ -24,7 +24,8 @@ def to_uchar(x):
 	return x
 	
 def uchr(x):
-	return struct.pack('B', x)
+	#  return struct.pack('B', x)
+	return bytes([x])
 
 def cx(x):
 	return hex(c(x))

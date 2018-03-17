@@ -1,15 +1,18 @@
 from math import sqrt
-
+import signal
+from const_motion import *
 from convert import *
 from conf import *
-from const_motion import *
 from parser import *
-from const_motion import *
 
 status_idle = 'I'
 
 def vec_length(x,y):
 	return sqrt(x**2+y**2)
+	
+def P_cmd(p):
+	# print(len(p), p)
+	print(chr(p[0]) + " (" + str(l16(p, 1)) + ", " + str(l16(p, 3)) + ")  angle: " + str(l16(p, 5))) 
 		
 class Engine:
 	def __init__(self):
@@ -24,33 +27,57 @@ class Engine:
 		else:
 			from Uart import Uart
 			self.com = Uart()
+			
+		def on_interrupt(a,b):
+			self.stop()
+			exit(0)
+		signal.signal(signal.SIGINT, on_interrupt)
 	def wait_for_arrival(self):
+		cycle=0
+		trans=0
+		idles=0
+		n_idles = 5
 		while True:
-			pkt = read()
+			pkt = self.read()
 			p = pkt[1]
-			if chr(pkt[0]) == 'p':
+			if chr(pkt[0]) == 'P':
 				#print("pkt p: ", pkt[1])
-				P_cmd(pkt[1])
+				#  P_cmd(pkt[1])
 				x = l16(p,1)
 				y = l16(p,3)
 				o = l16(p,5)
-				s = l16(p,7)
-				if tol > 0 and vec_length(x-point[0], y-point[1]) < tol:
+				#  s = l16(p,7)
+				if self.tol > 0 and vec_length(x-self.point[0], y-self.point[1]) < self.tol:
 					print("tolerance done")
 					return True
 				
-			elif chr(pkt[0]) == 'P':
+			
+			if chr(pkt[0]) == 'P':
 				#print("pkt P: ", pkt[1])
-				P_cmd(pkt[1])
-				if p[0] == status_idle:
+				cycle+=1
+				if cycle % 5 == 0:
+					P_cmd(pkt[1])
+					
+				# I X I
+				# idle if:
+				# 	1. num idles
+				#	2. transition from X to I
+				# catch idle
+				if chr(p[0]) == status_idle or chr(p[0]) == 'S':
+					idles+=1
+					if trans == 0 and idles <= n_idles:
+						continue
 					print("idle, done")
 					return True
+				elif trans == 0:
+					trans = 1
+					
 			else:
-				if debug:
+				if self.debug:
 					print("pkt: ", chr(pkt[0]))
 	
 	
-	def send(self, x, process=False):
+	def send(self, x, addr=None, process=False):
 		text = x
 		if process:
 			tokens = text.split("\\x")
@@ -70,10 +97,13 @@ class Engine:
 			binary = x
 		
 		if self.use_can:
-			self.com.send(binary, self.addr)
+			self.com.send(binary, addr if addr != None else self.addr)
 		else:
 			self.com.send(binary)
-					
+	
+	def t(s, x):
+		s.send(bytes([x]), 0x8d53)
+	
 	def read(self):
 		if self.use_can:
 			frm = self.com.read(self.addr)
@@ -90,23 +120,31 @@ class Engine:
 	def turn_cmd(self, o):
 		self.send(b'T' + pack(o))
 		
+	def stop_cmd(self):
+		self.send(b'S')
+		
 	def speed(self, s):
 		self.send(b'V' + uchr(s))
+
+	def forward(self, dist):
+		self.intr()
+		self.send(b'D' + pack(dist) + bytes([0]))
+		self.wait_for_arrival()
 		
 	def intr(self):
 		self.send(b'i')
 		
 	def move(self, x,y,r=100,o=1):
-		print('moving to: ', x, y)
+		print('\x1b[33m moving to: \x1b[0m', x, y)
 		self.intr()
-		point = [x,y]
+		self.point = [x,y]
 		self.move_to_cmd(x,y,r,o)
 		self.wait_for_arrival()
 
 	def goto(self, x,y,o=1):
 		print('goto: ', x, y)
 		self.intr()
-		point = [x,y]
+		self.point = [x,y]
 		self.goto_cmd(x,y,o)
 		self.wait_for_arrival()
 
@@ -114,7 +152,11 @@ class Engine:
 		print('turn: ', o)
 		self.intr()
 		self.turn_cmd(o)
-		self.wait_for_arrival(0)
+		self.wait_for_arrival()
+		
+	def stop(self):
+		self.intr()
+		self.stop_cmd()
 		
 	def setpos(self, x,y,o=0):
 		self.send(b'I' + pack(x) + pack(y) + pack(o))

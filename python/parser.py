@@ -1,4 +1,3 @@
-#!/usr/bin/python
 import sys
 sys.path.append('/home/pi/python')
 from convert import l16

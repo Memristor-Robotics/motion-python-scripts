@@ -21,6 +21,7 @@ class Can:
 			self.use_eff = 0x80000000
 		else:
 			self.use_eff = 0
+	
 	def init():
 		import subprocess
 		subprocess.call('sudo ip link set can0 down'.split(' '))
@@ -70,11 +71,6 @@ class Can:
 			print('[debug] sent: ' + Can.nice_hex(frame))
 		self.s.send(frame)
 		
-	def send(self,buff,addr=None):
-		if addr == None:
-			addr = self.addr		
-		frame = self._build_can_frame(addr, buff)
-		self.s.send(frame)
 
 	def graw(self):
 		frame = self._dissect_can_frame(self.s.recv(16))

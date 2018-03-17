@@ -20,3 +20,5 @@ print('use: \n\
 	')
 from Can import *
 c = Can()
+
+def t(x): global c; c.send(bytes([x]), 0x8d53)
