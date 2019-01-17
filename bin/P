@@ -1,4 +1,5 @@
 #!/bin/bash
 
-#echo -en "S" > /dev/serial0
+# Hard stop
+
 s S

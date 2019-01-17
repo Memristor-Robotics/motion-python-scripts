@@ -1,16 +1,24 @@
 #!/usr/bin/python3
 import os,sys
+sys.dont_write_bytecode = True
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'python'))
 from Engine import *
 e=Engine()
+e.intr()
 
-e.send(b'i')
-# xx yy o rr
-radius = 0
-orient = 1
-if len(sys.argv) >= 4:
-	radius = int(sys.argv[3])
-if len(sys.argv) >= 5:
-	orient = to_uchar(int(sys.argv[4]))
-if len(sys.argv) >= 3:
-	e.send(b'N' + pack(int(sys.argv[1])) + pack(int(sys.argv[2])) + uchr(orient) + pack(radius))
+h = '''
+Move To command
+N x y [radius] [dir]
+	x - x coord
+	y - y coord
+	radius - radius in which robot can rotate, when robot leaves this circle, it will finish its rotation - optional argument
+	dir - {1 - move forward, -1 - move backward, 0 - auto choose} - optional argument
+'''
+radius = 0x7fff
+direction = 1
+if len(sys.argv) > 3: radius = int(sys.argv[3])
+if len(sys.argv) > 4: direction = to_uchar(int(sys.argv[4]))
+if len(sys.argv) > 2:
+	e.move_cmd(int(sys.argv[1]), int(sys.argv[2]), radius, direction)
+else:
+	print(h)

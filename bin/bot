@@ -1,0 +1,7 @@
+#!/usr/bin/bash
+
+# bot - select can device or uart
+
+if [ ! -z $PYTHON ]; then
+	echo $1 > "$PYTHON/conf.txt"
+fi

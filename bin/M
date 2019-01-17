@@ -1,0 +1,18 @@
+#!/usr/bin/python3
+import os,sys
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'python'))
+from Engine import *
+e=Engine()
+e.intr()
+
+h = '''
+Robot constant speed (previous m command was unregulated PWM, this is regulated speed)
+M left right
+	left - left wheel speed [0-255]
+	right - right wheel speed [0-255]
+'''
+
+if len(sys.argv) > 2:
+	e.const_speed_cmd(int(sys.argv[1]), int(sys.argv[2]))
+else:
+	print(h)

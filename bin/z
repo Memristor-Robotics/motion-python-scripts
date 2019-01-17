@@ -1,12 +1,12 @@
-#!/usr/bin/python3
-import os,sys
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'python'))
-from Engine import *
-e=Engine()
-e.send(b'i')
+#!/bin/bash
 
-if len(sys.argv) == 2:
-	num = -int(sys.argv[1])
-	e.send(b"D" + pack(num) + uchr(0))
-else:
-	e.send(b"D" + b'\xfe\x00\x00')
+# Go Straight (backward by default)
+# z [d]
+# 	d - distance in millimeters (negative value to go in other direction) - optional argument
+# 		if this argument is omitted its assumed value of 500
+
+distance=-500
+if [ ! -z $1 ]; then
+	distance=$((-$1))
+fi
+n $distance

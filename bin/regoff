@@ -1,0 +1,6 @@
+#!/bin/bash
+# Turn regulation off
+
+conf rotation_regulator 0
+conf distance_regulator 0
+conf debug_encoders 1

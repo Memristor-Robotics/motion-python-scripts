@@ -1,24 +1,48 @@
 #!/usr/bin/python3 -i
 
+# CAN debugging command
+
 import os,sys
+sys.dont_write_bytecode = True
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'python'))
+from com.Can import *
 
-from Can import *
-Can.init()
+if len(sys.argv) == 2 and sys.argv[1] == '-i':
+	Can.init()
 
+c=Can()
 print('CAN cmd')
 
-print('use: \n\
-	c.actuator(which, value)\n\
-	c.servo(which, func, value)\n\
-	listServoCmds()\n\
-	listServo()\n\
-	listActuators()\n\
-	c.read()\n\
-	c.read(addr)\n\
-	c.debug = 1\n\
-	')
-from Can import *
-c = Can()
+print('''use: 
+	c.actuator(which, value)
+	c.servo(which, func, value)
+	listServoCmds()
+	listServo()
+	listActuators()
+	c.read()
+	c.read(addr)
+	c.debug = 1
+	''')
 
-def t(x): global c; c.send(bytes([x]), 0x8d53)
+def t(x): 
+	c.send(bytes([x]), 0x8d53)
+
+def pump(x,v):
+	c.send(bytes([v]) * 5, 0x6c10) if x == 0 else c.send(bytes([v]), 0x6c10+x)
+
+servo_id = 0x00008D70
+def klapna(v):
+	c.servo(3, 'GoalPosition', 85 if v == 1 else 225, servo_id)
+	
+def cev2(v):
+    c.servo(20, 'GoalPosition', 130 if v == 0 else 200, servo_id)
+    
+def cev(v):
+    c.servo(5, 'GoalPosition', 805 if v == 0 else 703, servo_id)
+    
+def prekidac(v):
+    c.servo(1, 'GoalPosition', 272 if v == 0 else 0, servo_id)
+    
+def pcelica(v):
+    c.servo(7,'GoalPosition', 815 if v == 1 else 221, servo_id)
+

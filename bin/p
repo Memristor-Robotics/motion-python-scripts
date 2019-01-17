@@ -1,4 +1,5 @@
 #!/bin/bash
 
-#echo -en "S" > /dev/serial0
+# Soft stop
+
 s t

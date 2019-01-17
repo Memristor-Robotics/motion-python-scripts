@@ -1,28 +1,75 @@
 #!/usr/bin/python3
-import binascii
+
+# listen for commands coming from CAN or UART
 
 import os,sys
+sys.dont_write_bytecode = True
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'python'))
 from Engine import *
-e=Engine()
-
+e=Engine(dont_stop_on_exit=True)
 
 def P_cmd(p):
-	# print(len(p), p)
-	print(chr(p[0]) + " (" + str(l16(p, 1)) + ", " + str(l16(p, 3)) + ")  angle: " + str(l16(p, 5))) 
+        if len(p) < 7:
+                return
+        else:
+                pass
+                #  print(len(p), p)
+        print(chr(p[0]) + " (" + str(l16(p, 1)) + ", " + str(l16(p, 3)) + ")  angle: " + str(l16(p, 5))) 
 
+def p_cmd(p):
+        if len(p) < 7:
+                return
+        else:
+                pass
+                #  print(len(p), p)
+        print('p ', chr(p[0]) + " (" + str(l16(p, 1)) + ", " + str(l16(p, 3)) + ")  angle: " + str(l16(p, 5))) 
+
+
+def D1_cmd(p):
+        print('enc1: ' + str(l32(p,0)))
+
+def D2_cmd(p):
+        print('enc2: ' + str(l32(p,0)))
+def D_cmd(p):
+        print(len(p), p)
+        print(str(l32(p, 0)) + ", " + str(l32(p, 4)))
+
+def D16_cmd(p):
+        print(len(p), p)
+        print(str(l16(p, 0)) + ", " + str(l16(p, 2)))
+
+def K_cmd(p):
+        print('error: ' + str(l32(p,0)))
+
+def E_cmd(p):
+        #  print('setpoint: ' + str(l32(p,0)))
+        print(p)
+def e_cmd(p):
+        print('setpoint2: ' + str(l32(p,0)))
 def do_nothing(p):
-	pass
+        pass
 
+def b_cmd(p):
+        print('b: ', l16(p,0), l32(p,2))
+def a_cmd(p):
+        print('a: ', l16(p,0), l16(p,2))
 packets = {
-	'P': P_cmd,
-	'p': P_cmd,
-	#'F': do_nothing,
-	#'A': do_nothing
+        'P': P_cmd,
+        'p': p_cmd,
+        '1': D1_cmd,
+        '2': D2_cmd,
+        #'K': K_cmd,
+        #  'E': E_cmd,
+        'e': e_cmd,
+        'a': a_cmd,
+        'b': b_cmd,
+        #'F': do_nothing,
+        #'A': do_nothing
 }
 while True:
-	p = e.read()
-	if chr(p[0]) in packets:
-		packets[chr(p[0])](p[1])
-	else:
-		print(chr(p[0]), binascii.hexlify(p[1]))
+        p = e.read()
+        if chr(p[0]) in packets:
+                packets[chr(p[0])](p[1])
+        else:
+                pass
+                print('pkt: ', chr(p[0]), hex(p[0]), nice_hex(p[1]))

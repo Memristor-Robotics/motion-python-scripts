@@ -1,0 +1,198 @@
+#!/usr/bin/python3
+import os,sys
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'python'))
+from Engine import *
+e=Engine()
+
+# Arrows - control robot with arrow keys
+#	 this command isn't perfect, maybe it could be made better
+#	 but it has limitations in OS keyboard processing
+#	 because it cannot get key ups, only key downs
+#	 also 2nd key down event will delay 200ms more than next ones
+	
+class _GetchUnix:
+    def __init__(self):
+        import tty, sys
+
+    def __call__(self):
+        import sys, tty, termios
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        try:
+            tty.setraw(sys.stdin.fileno())
+            ch = sys.stdin.read(1)
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+        return ch
+
+getch = _GetchUnix()
+
+# because getch returns only 1 character
+# and arrow keys are made up from 3 characters
+class SimpleFSM:
+	def __init__(s):
+		s.els=[]
+		s.accum=''
+		s.min_len, s.max_len = 99, -1
+		
+	def add_str(s, a, func):
+		s.els.append((a,func))
+		s.min_len, s.max_len = min(s.min_len, len(a)), max(s.max_len, len(a))
+		
+	def __call__(s,a):
+		if len(s.accum) >= s.max_len:
+			s.accum = s.accum[1:]
+		s.accum += a
+		if len(s.accum) >= s.min_len:
+			for i,f in s.els:
+				if i in s.accum: 
+					s.accum = s.accum.replace(i,'')
+					f()
+					return
+
+fsm=SimpleFSM()
+
+#####
+from operator import add,sub,mul
+import math
+
+def add_pt(p1,p2):
+	return list(map(add, p1, p2))
+	
+def sub_pt(p1,p2):
+	return list(map(sub, p1, p2))
+
+def neg(p):
+	return [-p[0],-p[1]]
+
+def mul_pt(p,scalar):
+	return list(map(mul, p, (scalar,scalar)))
+	
+def clip_pt(p, clp):
+	if type(clp) is not list: clp = [clp,clp]
+	return list(map(lambda a,c: math.copysign(min(abs(a), abs(c) ), a), p, clp))
+
+def vec_norm(p):
+	if p==[0,0]: return [0,0]
+	return mul_pt(p,1/math.hypot(*p))
+
+def clip_norm(p, scalar):
+	if p==[0,0]: return [0,0]
+	s=math.hypot(*p)
+	return mul_pt( vec_norm(p), scalar ) if s > scalar else p
+	
+def point_int(p):
+	return list(map(int, p))
+
+class State:
+	m=[0,0]
+	a=[0,0]
+	ticks=0
+	
+	d=[0,0]
+	d1=[0,0]
+
+	reduce_speed=3
+	amp=5
+	max_amp=50
+	last=time.time()
+	question = 0
+	
+	@staticmethod
+	def do(act):
+		State.m=point_int( add_pt(State.m, State.a ))
+		if (time.time() - State.last) < 0.15 and act == State.a:
+			State.ticks = min(State.ticks+1, 3)
+		else:
+			State.ticks = 3
+			State.a = act
+		State.last = time.time()
+
+
+def ask_q(msg):
+	State.question = True
+	time.sleep(0.1)
+	r=input('\r\n\n'+msg)
+	State.question = False
+	return r
+
+# control_func = e.motor_pwm_cmd
+control_func = e.const_speed_cmd
+
+def pr(*args):
+	if not State.question: 
+		print(*args)
+q=0
+def loop():
+	while not q:
+		
+		if State.ticks > 0:
+			State.m=point_int( add_pt(State.m, State.a ))
+			State.ticks-=1
+		else:
+			# pr('\rno ticks')
+			State.d1 = [0,-0.1]
+		
+		v=map(mul, State.a, State.d)
+		State.a = add_pt(State.a, v)
+		d1=map(mul, State.m, State.d1)
+		d1 = clip_pt(d1, State.m)
+		d2 = list(map(lambda a,b,c: (1 if a*b < 0 else 0)*math.copysign(c, b), State.m, State.a, [0, State.amp*0.8]))
+		State.m = clip_pt( add_pt(State.m, add_pt(d1,d2)), [State.max_amp, State.max_amp*0.5] )
+		State.m = point_int(State.m)
+		d,r = State.m
+		power = [ d - r, d + r ]
+		time.sleep(0.1)
+		if not q: control_func(*power)
+		pr('\rstate:', State.m)
+
+m = 0.8
+def up():
+	State.d1=[0,-0.3]
+	State.do(mul_pt([1, 0], State.amp))
+	
+def down():
+	State.d1=[0,-0.3]
+	State.do(mul_pt([-1, 0], State.amp))
+	
+def left():
+	State.d1=[0,0]
+	State.do(mul_pt([0, 1], 0.5*State.amp*m))
+	
+def right():
+	State.d1=[0,0]
+	State.do(mul_pt([0, -1], 0.5*State.amp*m))
+
+fsm.add_str('\x1b[A', up)
+fsm.add_str('\x1b[B', down)
+fsm.add_str('\x1b[D', left)
+fsm.add_str('\x1b[C', right)
+
+
+import threading
+t=threading.Thread(target=loop)
+t.start()
+while True:
+	c=getch()
+	if c == 'q' or c == '\x03': 
+		q=1
+		e.intr()
+		exit(0)
+	elif c == 's':
+		State.do([0, 0])
+		State.d1 = [-0.5, -0.5]
+		s=ask_q('enter speed:')
+		try:
+			s=int(s)
+		except: 
+			continue
+		State.max_amp = s
+		State.reduce = 0.5 * State.amp
+	elif c == ' ':
+		State.do([0, 0])
+		State.d1 = [-0.5, -0.5]
+	elif c == 'f':
+		State.d1 = [0,-0.5]
+	fsm(c)
+	
+	# print(c, hex(ord(c)))

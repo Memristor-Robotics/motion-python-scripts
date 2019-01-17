@@ -1,15 +1,23 @@
 #!/usr/bin/python3
 
+# send raw commands
+
 import os,sys
+sys.dont_write_bytecode = True
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'python'))
 from Engine import *
 e=Engine()
+
+# Send raw command to motion board - it uses UART protocol if UART is used
+# 	example:
+#	> s "something"
+# 	this sets robot speed to 0x80, you may pass hexadecimal values like \x00, \xff
+#	> s "V\x80"
+
 
 if len(sys.argv) < 2:
 	print("argument missing")
 	exit(0)
 
 text = sys.argv[1]
-
 e.send(text, None, True)
-

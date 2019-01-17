@@ -1,0 +1,19 @@
+#!/usr/bin/python3
+import os,sys
+sys.dont_write_bytecode = True
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'python'))
+from Engine import *
+e=Engine()
+e.intr()
+
+h = '''
+Relative curve command - perpendicular center for alpha angle, in dir direction
+q radius alpha
+	radius - radius of curve, negative for rotation around on other side
+	alpha - angle to rotate against perpendicular center, negative to rotate backward
+'''
+
+if len(sys.argv) > 2:
+	e.curve_rel_cmd(int(sys.argv[1]), int(sys.argv[2]))
+else:
+	print(h)

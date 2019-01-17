@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Send interrupt command
+#	stops currently running command
+
+s i

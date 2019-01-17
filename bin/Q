@@ -1,0 +1,23 @@
+#!/usr/bin/python3
+import os,sys
+sys.dont_write_bytecode = True
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'python'))
+from Engine import *
+e=Engine()
+e.intr()
+
+h='''
+Curve command - rotates around given center (x,y) for alpha angle, in dir direction
+Q x y alpha [dir]
+	x - x coord
+	y - y coord
+	alpha - rotation angle around (x,y) center
+	dir - direction in which robot will go (forward or backward) - optional argument
+'''
+
+d=1
+if len(sys.argv) > 4: d = 1 if int(sys.argv[4]) == 1 else 0
+if len(sys.argv) > 3:
+	e.curve_cmd(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), d)
+else:
+	print(h)

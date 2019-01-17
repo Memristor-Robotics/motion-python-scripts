@@ -1,6 +1,7 @@
 /*
 /.*
 /*
+!README.md
 /*/
 *.pyc
 *.txz
@@ -8,3 +9,4 @@
 !/bin/
 !/python/
 !/tests/
+__pycache__

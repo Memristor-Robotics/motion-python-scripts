@@ -1,11 +1,15 @@
 #!/usr/bin/python3
 import os,sys
+sys.dont_write_bytecode = True
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'python'))
 from Engine import *
 e=Engine()
+e.intr()
 
-e.send(b'i')
-if len(sys.argv) == 2:
-	e.send(b'D' + pack(int(sys.argv[1])) + b'\x00')
-else:
-	e.send(b'D' + pack(512) + b'\x00')
+# Go Straight (forward by default)
+# n [d]
+# 	d - distance in millimeters (negative value to go in other direction) - optional argument
+# 		if this argument is omitted its assumed value of 500
+
+distance = int(sys.argv[1]) if len(sys.argv) == 2 else 500
+e.forward_cmd(distance)

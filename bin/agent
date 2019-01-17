@@ -1,12 +1,10 @@
 #!/usr/bin/python3
 
 import socket
-import threading
-import sys
-import os
-sys.path.append('/home/pi/python')
-from Can import *
-Can.init()
+import sys,os,threading
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'python'))
+from com.Can import *
+from util.convert import *
 CAN_TO_NETWORK = 1
 CAN_TO_SLAVES = 2
 
@@ -24,6 +22,10 @@ connection_list = []
 c = Can()
 
 
+# Agent
+#	This command listens for TCP incoming connections (TCP server)
+#	and does routing of CAN messages to/from TCP clients
+
 # canid = 0x258, ext id, 8 bytes, padding 3 Bytes, 8 Bytes 
 # 5802 0080 0800 0000 6902 0202 0200 0000 
 
@@ -35,18 +37,23 @@ class Controller(threading.Thread):
 		
 	def run(self):
 		while True:
-			type_and_len = self.conn.recv(1)
-			if len(type_and_len) == 0:
-				print('client disconnected')
-				connection_list.remove(conn)
-				break
-			elif len(type_and_len) < 0:
-				continue
+			len_and_type = self.conn.recv(3)
 			
-			_type = type_and_len[0]
+			if len(len_and_type) == 0:
+				print('client disconnected')
+				connection_list.remove(self.conn)
+				break
+			elif len(len_and_type) < 2:
+				continue
+				
+			_len=l16(len_and_type,0)
+			_type = len_and_type[2]
+			msg = self.conn.recv(_len & 0xffff)
+			
 			if _type == CAN_TO_SLAVES:
-				frame = self.conn.recv(16)
-				print("sending frame ", Can.nice_hex(frame))
+				frame = msg[:16]
+				#  frame = self.conn.recv(16)
+				print('sending frame ', nice_hex(frame))
 				# just send whole frame
 				c.s.send(frame)
 
@@ -62,13 +69,17 @@ class CANListener(threading.Thread):
 			can_frame = c.s.recv(16)
 			for i in connection_list:
 				# send to all connected TCPs
-				i.send(struct.pack('B', CAN_TO_NETWORK) + can_frame)
+				try:
+					i.send(bytes([0,16+1, CAN_TO_NETWORK]) + can_frame)
+				except:
+					connection_list.remove(i)
+					pass
 
 listener = CANListener()
 listener.start()
 while True:
 	conn, addr = s.accept()
-	print("new connection " + str(addr))
+	print('new connection ' + str(addr))
 	connection_list.append(conn)
-	cnt = Controller(conn)
+	cnt=Controller(conn)
 	cnt.start()

@@ -1,9 +1,17 @@
 #!/usr/bin/python3
 import os,sys
+sys.dont_write_bytecode = True
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'python'))
 from Engine import *
-e=Engine()
+e=Engine(dont_stop_on_exit=True)
 
+h = '''
+Set/Get configuration
+conf list - to list possible configuration values (currently listed)
+conf conf_name [new_value]
+	conf_name - name of configuration to read or set (if not using new_value argument, this command reads current robot configuration)
+	new_value - if used, this command will set new value - optional argument
+'''
 
 if len(sys.argv) == 2:
 	if sys.argv[1] == 'list':
@@ -11,8 +19,11 @@ if len(sys.argv) == 2:
 	else:
 		print( e.conf_get(sys.argv[1]) )
 
-elif len(sys.argv) >= 3:
-	if not e.conf_set(sys.argv[1], sys.argv[2]):
-		print("no such config")
+elif len(sys.argv) > 2:
+	if not e.conf_set(sys.argv[1], float(sys.argv[2])): print("no such config")
+else:
+	print(h)
+	print('Available config is:')
+	e.conf_list()
 
 

@@ -1,9 +1,7 @@
-import socket
-import struct
-import sys
-import binascii
-import time
-from conf_can import *
+import sys,socket,struct,time
+from com.conf_can import *
+from util.Convert import *
+from conf import *
 
 class Can:
 
@@ -13,10 +11,10 @@ class Can:
 		self.use_eff = 0x80000000
 		self.debug = debug
 		self.s = socket.socket(socket.AF_CAN, socket.SOCK_RAW, socket.CAN_RAW)
-		iface = 'can0'
+		iface = can_dev
 		self.s.bind((iface,))
 		
-	def ext(self,tf):
+	def ext(self, tf):
 		if tf:
 			self.use_eff = 0x80000000
 		else:
@@ -25,7 +23,7 @@ class Can:
 	def init():
 		import subprocess
 		subprocess.call('sudo ip link set can0 down'.split(' '))
-		subprocess.call('sudo ip link set can0 up type can bitrate 500000'.split(' '))
+		subprocess.call('sudo ip link set can0 up type can bitrate 500000 restart-ms 10'.split(' '))
 
 	def _build_can_frame(self, can_id, data):
 			can_dlc = len(data)
@@ -36,24 +34,39 @@ class Can:
 			can_id, can_dlc, data = struct.unpack(self.can_frame_fmt, frame)
 			return (can_id, can_dlc, data[:can_dlc])
 
-
 	def swap32(i):
-			return struct.unpack("<I", struct.pack(">I", i))[0]
+			return struct.unpack('<I', struct.pack('>I', i))[0]
 
 	def set_addr(self, a):
 		self.addr = a
-
-	def nice_hex(s, spaces=4):
-		h = binascii.hexlify(s).decode('ascii')
-		return ' '.join([h[i:i+spaces] for i in range(0, len(h)-(len(h)%spaces)+spaces, spaces)])
-
+		
 	def send(self, binary, addr=None):
-		if addr == None:
-			addr = self.addr
-		frame = self._build_can_frame(addr, binary)
-		if self.debug:
-			print('[debug] sent: ' + Can.nice_hex(frame))
-		self.s.send(frame)
+		
+		def _send(binary, addr=None):
+			if addr == None: addr = self.addr
+			frame = self._build_can_frame(addr, binary)
+			if self.debug: print('[debug] sent: ' + nice_hex(binary))
+			self.s.send(frame)
+		
+		# if bigger than 8 bytes, send by using CAN packet extender protocol
+		if len(binary) > 8:
+			left = len(binary) - 1
+			s = 1
+			# \rTL 5
+			l =  min(left,5)
+			_send(b'\n' + bytes([binary[0], left]) + binary[s:s+l], addr)
+			left -= l
+			s += l
+			while left > 0:
+				l =  min(left,7)
+				_send(b'\r'+binary[s:s+l], addr)
+				# print(s,left)
+				left -= l
+				s += l
+		else:
+			# send normal packet
+			_send(binary, addr)
+	
 		
 	def read(self, addr=None):
 		while True:
@@ -64,21 +77,23 @@ class Can:
 				return frame[2]
 				
 		
-	def raw(self,_addr,f,val):
-		''' f, val '''
-		frame = self._build_can_frame(_addr, struct.pack(f, *val))
-		if self.debug:
-			print('[debug] sent: ' + Can.nice_hex(frame))
+	def send_frame(self,f,val,addr=None):
+		''' 
+		format, values
+		'''
+		frame = self._build_can_frame(addr, struct.pack(f, *val))
+		if self.debug: print('[debug] sent: ' + nice_hex(frame))
 		self.s.send(frame)
-		
 
-	def graw(self):
+	def read_frame(self):
 		frame = self._dissect_can_frame(self.s.recv(16))
-		print(Can.nice_hex(frame[2]))
+		if self.debug: print(nice_hex(frame[2]))
+		return frame
 
-	def servo(self,which,f,val=None):
+
+	# servo and actuators (could be moved to other file maybe)
+	def servo(self,which,f,val=None,addr=None):
 		
-
 		if f not in servo_commands:        
 			print('function ' + f + ' doesn\'t exist')
 			return
@@ -117,23 +132,27 @@ class Can:
 		elif servo_fmt == 'h':
 			servo_len += 1
 
-
-		addr = 0x7f00 if type(which) is int or servo[0] == 'ax' else 0x7f01
+		if addr == None:
+			addr = 0x7f00 if type(which) is int or servo[0] == 'ax' else 0x7f01
 		fmt = '4B'+servo_fmt
 		data = [servo_id, servo_len, servo_rw, servo_func]
 		if val != None:
 			data += [val]
 
-		self.raw(addr, fmt, data)
+		self.send_frame(fmt, data, addr)
+		
+		# handle reading
+		#TODO: make it work
+		'''
 		if val == None:
 			print('Sent request, waiting for answer')
 			while True:
-				frame = self._dissect_can_frame(self.s.recv(16))
+				frame = self.read_frame()
 				
 				if frame[0] == (addr | self.use_eff) and frame[1] > 0:
-					print(hex(frame[0]), Can.nice_hex(frame[2]))
+					print(hex(frame[0]), nice_hex(frame[2]))
 					return
-
+		'''
 
 	def actuator(self, which, val=None):
 		'''
@@ -162,7 +181,6 @@ class Can:
 				data = [val]
 			else:
 				print("reading from sensor not implemented yet")
-				#self.raw(act[0], 'B', [val])
 
-			self.raw(act[0], 'B', [val])
+			self.send_frame(act[0], 'B', [val])
 		

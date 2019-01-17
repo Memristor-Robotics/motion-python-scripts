@@ -31,6 +31,7 @@ servo_commands = {
 	'Punch': [48, 'RW', 'h'],
 }
 
+# servos and actuators
 robot_servos = {
 	'ColorServo': ['ax', 7],
 	'Stopper': ['ax', 6],
@@ -60,8 +61,8 @@ robot_byte_act = {
 	'ColorRotator2': [0x7f07, 'W'],
 	'SColorRotator1': [0x7f13, 'W'],
 	'SColorRotator2': [0x7f14, 'W'],
-	
 }
+
 
 
 def listServoCmds():

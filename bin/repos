@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Resets robot position and speed
+
+s R

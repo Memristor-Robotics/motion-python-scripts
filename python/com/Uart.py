@@ -1,68 +1,68 @@
 #!/usr/bin/python3
 
-import tty
-import os
-import binascii
-from convert import uchr
+import tty,os,binascii,time
+from conf import *
+from util.Convert import *
+import serial
 
 class Uart:
 	def __init__(self):
-		self.f = os.open("/dev/serial0", os.O_RDWR)
-		#tty.setraw(self.f)
+		self.f = serial.Serial(uart_dev, 57600)
 	
 	def init():
-		os.system('stty -echo raw 57600 -F/dev/serial0')
+		os.system('stty -echo raw '+str(uart_baud)+' -F'+uart_dev)
 		
 	def rddata(self, n=1):
 		b = b''
 		while n > 0:
-			d = os.read(self.f, 1)
+			try:
+				d = self.f.read(n)
+			except:
+				continue
 			n -= len(d)
 			b += d
 		return b
-
 	
 	# SCTLxxxx
-	def read(self):
+	def read(self, addr=None):
 		sync = 0x3c
 		while True:
 			S = self.rddata()[0]
 			if S == sync:
+				#  print('msg ' + str(S))
 				C = self.rddata()[0]
 				T = self.rddata()[0]
 				L = self.rddata()[0]
 
-				#print("reading " + hex(C) + " " + hex(T) + " " + hex(L) )
 				CH = C >> 4
 				CP = C & 0xf
 
 				if CH != ((T + L) & 0xf):
+					print('header checksum bad')
 					continue
-
-				#print("header ok")
 				c = 0
 				data = self.rddata(L)
-				for i in data:
-					c += i
-
+				for i in data: c += i
 				if CP != (c & 0xf):
+					print('data checksum bad')
 					continue
 				return (T, data)
+			else:
+				print('not sync: ' + hex(S))
 
-
-	def send(self, x):
+	def flush(self): self.f.flushInput()
+	
+	def send(self, x, addr=None):
 		binary = x
-		#print('bin: ' , binascii.hexlify(binary))
 		ptype = binary[0]
 		payload = len(binary)-1
 		header_checksum = (ptype + payload) & 0xf
 		payload_checksum = 0
-		for i in binary[1:]:
-			payload_checksum += i
+		for i in binary[1:]: payload_checksum += i
 		payload_checksum &= 0xf
 		checksum = (header_checksum << 4) | payload_checksum
-
 		packet = b'\x3c' + uchr(checksum) + uchr(ptype) + uchr(payload) + binary[1:]
-		print(binascii.hexlify(packet))
-		os.write(self.f, packet)
+		# print(binascii.hexlify(packet))
+		self.f.write(packet)
+		time.sleep(0.11)
 

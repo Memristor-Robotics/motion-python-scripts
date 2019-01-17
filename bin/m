@@ -3,6 +3,16 @@ import os,sys
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'python'))
 from Engine import *
 e=Engine()
+e.intr()
 
-e.send(b'i')
-e.send(b'm' + pack(int(sys.argv[1])) + pack(int(sys.argv[2])))
+h = '''
+Motor PWM
+m left right
+	left - left motor pwm (valid value is in range [0-3200])
+	right - right motor pwm (valid value is in range [0-3200])
+'''
+
+if len(sys.argv) > 2:
+	e.motor_pwm_cmd(int(sys.argv[1]), int(sys.argv[2]))
+else:
+	print(h)

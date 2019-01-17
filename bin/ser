@@ -1,6 +1,9 @@
 #!/usr/bin/python3
 import os,sys
+sys.dont_write_bytecode = True
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'python'))
-from Uart import *
+from com.Uart import *
 Uart.init()
 
+
+# Initialize UART
