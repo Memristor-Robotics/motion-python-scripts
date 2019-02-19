@@ -111,7 +111,7 @@ class Can:
 		servo_len = 4
 		servo_func = cmd[0]
 		servo_rw = cmd[1]
-		servo_fmt = cmd[2]
+		pfmt=servo_fmt = cmd[2]
 
 		if val == None and 'R' not in servo_rw:
 			print('function ' + f + ' is not readable')
@@ -123,14 +123,12 @@ class Can:
 
 		if val == None:
 			servo_rw = 2
-			servo_fmt = ''
+			servo_fmt = 'B'
+			servo_len = 4
 		else:
 			servo_rw = 3
-
-		if val == None:
-			servo_len = 3
-		elif servo_fmt == 'h':
-			servo_len += 1
+			if servo_fmt == 'h':
+				servo_len += 1
 
 		if addr == None:
 			addr = 0x7f00 if type(which) is int or servo[0] == 'ax' else 0x7f01
@@ -138,6 +136,8 @@ class Can:
 		data = [servo_id, servo_len, servo_rw, servo_func]
 		if val != None:
 			data += [val]
+		else:
+			data += [2] if pfmt == 'h' else [1]
 
 		self.send_frame(fmt, data, addr)
 		

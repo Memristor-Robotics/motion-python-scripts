@@ -13,8 +13,9 @@ filename=os.path.join(os.path.dirname(os.path.realpath(__file__)), 'conf.txt')
 if os.path.isfile(filename):
 	with open(filename) as f:
 		l=f.readline()[:-1]
-		if l.lower() == 'uart':
+		if not l.lower().startswith('can'):
 			use_can = 0
+			uart_dev = l	
 		else:
 			can_dev = l
 else:

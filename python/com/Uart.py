@@ -61,7 +61,7 @@ class Uart:
 		for i in binary[1:]: payload_checksum += i
 		payload_checksum &= 0xf
 		checksum = (header_checksum << 4) | payload_checksum
-		packet = b'\x3c' + uchr(checksum) + uchr(ptype) + uchr(payload) + binary[1:]
+		packet = b'\x3c' + p8(checksum) + p8(ptype) + p8(payload) + binary[1:]
 		# print(binascii.hexlify(packet))
 		self.f.write(packet)
 		time.sleep(0.11)
