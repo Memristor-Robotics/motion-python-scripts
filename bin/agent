@@ -4,7 +4,7 @@ import socket
 import sys,os,threading
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'python'))
 from com.Can import *
-from util.convert import *
+from util.Convert import *
 CAN_TO_NETWORK = 1
 CAN_TO_SLAVES = 2
 
@@ -43,7 +43,7 @@ class Controller(threading.Thread):
 				print('client disconnected')
 				connection_list.remove(self.conn)
 				break
-			elif len(len_and_type) < 2:
+			elif len(len_and_type) < 3:
 				continue
 				
 			_len=l16(len_and_type,0)

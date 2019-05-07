@@ -92,7 +92,10 @@ class Engine:
 	def const_speed_cmd(self, m1,m2): self.send(b'M' + p16(m1) + p16(m2))
 	def curve_rel_cmd(self, r, alpha): self.send(b'q' +  p16(r) + p16(alpha))
 	def speed_cmd(self, s): self.send(b'V' + p8(s))
+	def conf_save_cmd(self): self.send(b':')
 	#############################
+	
+	
 	
 	def speed(self, s):
 		self.print_cmd('speed',s)
@@ -153,6 +156,9 @@ class Engine:
 
 	########## [ CONFIG ] #########
 	
+	def conf_save(self):
+		self.conf_save_cmd()
+		
 	def conf_list(self):
 		from const_motion import config_bytes,config_ints,config_floats
 		confs=config_bytes + config_ints + config_floats

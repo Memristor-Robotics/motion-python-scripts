@@ -8,10 +8,11 @@ e.intr()
 
 h = '''
 Differential Drive
-d x y a
+d x y a d
 	x - x coord
 	y - y coord
 	a - goal angle
+	d - direction
 '''
 
 #####
@@ -23,6 +24,6 @@ d x y a
 #####
 
 if len(sys.argv) > 3:
-	e.diff_drive_cmd(*[int(sys.argv[i]) for i in range(1,4)])
+	e.diff_drive_cmd(*[int(sys.argv[i]) for i in range(1,len(sys.argv) )])
 else:
 	print(h)

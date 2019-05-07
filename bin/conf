@@ -16,6 +16,8 @@ conf conf_name [new_value]
 if len(sys.argv) == 2:
 	if sys.argv[1] == 'list':
 		e.conf_list()
+	elif sys.argv[1] == 'save':
+		e.conf_save()
 	else:
 		print( e.conf_get(sys.argv[1]) )
 

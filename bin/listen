@@ -25,11 +25,18 @@ def p_cmd(p):
         print('p ', chr(p[0]) + " (" + str(l16(p, 1)) + ", " + str(l16(p, 3)) + ")  angle: " + str(l16(p, 5))) 
 
 
+ra=rb=0
 def D1_cmd(p):
-        print('enc1: ' + str(l32(p,0)))
+        print('enc1: ', l32(p,0), ra)
 
 def D2_cmd(p):
-        print('enc2: ' + str(l32(p,0)))
+        print('enc2: ', l32(p,0), rb)
+def mark_real_enc1(p):
+		global ra
+		ra = l32(p,0)
+def mark_real_enc2(p):
+		global rb
+		rb = l32(p,0)
 def D_cmd(p):
         print(len(p), p)
         print(str(l32(p, 0)) + ", " + str(l32(p, 4)))
@@ -63,8 +70,8 @@ packets = {
         'e': e_cmd,
         'a': a_cmd,
         'b': b_cmd,
-        #'F': do_nothing,
-        #'A': do_nothing
+        '-': mark_real_enc2,
+        '3': mark_real_enc1
 }
 while True:
         p = e.read()
